@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            WikiMaze
+        </title>
+    </head>
+
+    <body>
+        <form id="input">
+            <label for="start">Maze Start:</label>
+            <input type="text" id="start" />
+                <br>
+            <label for="end">Maze End:</label>
+            <input type="text" id="end" />
+                <br>
+            <input type="submit" id="submit" />
+                <br>
+        </form>
+        
+        <div id="path"></div>
+        <div id="dump"></div>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+        <script>
+            
+            $('document').ready(function() {
+                $( "#input" ).submit(function( event ) {
+                    event.preventDefault();
+                    document.getElementById("path").textContent = "";
+                    var start = encodeURIComponent(document.getElementById("start").value);
+                    
+                    var nodes = {};
+                    var visited = {};
+                    var added = {};
+                    nodes[start] = 0;
+                    //visited[start] = true;
+                    //added[start] = true;
+                    var numNodes = 0;
+                    var nodelimit = 10;
+                    var recurseLimit = 3;
+                    var recursion = 0;
+                    var changed = 1;
+                    var hack = 0;
+                    var a = 0;
+                    var numLinks = 10;
+                    //console.log("here?\n");
+                    while (a < numLinks){
+                        var newDiv = document.createElement('div');
+                        newDiv.id = "hack" + a;
+                        //newDiv.style = "display: none;";
+                        document.body.appendChild(newDiv);
+                        a++;
+                    }
+                    //console.log("here!\n");
+                    //document.getElementById("hack" + (numLinks-1)).textContent="hack";
+                    while (changed = true && recursion < recurseLimit){
+                       // while (document.getElementById("hack" + (numLinks-1)).textContent == null){$.noop;}
+                        //for (a = 0; a < numLinks; a++){
+                        //    document.getElementById("hack" + a).textContent = null;
+                        //}
+                        for (a = 0; a < numLinks; a++){
+                            document.getElementById("hack" + a).textContent = "";
+                        }
+                        hack = 0;
+                        recursion += 1;
+                        changed = false;
+                        for (var z in nodes){
+                            //console.log(z);
+                            if (added[z] == null){
+                                console.log("getting links for " + z + "\n");
+                                var wait = $.getJSON("https://simple.wikipedia.org/w/api.php?action=query&titles=" + z + "&prop=links&format=json&pllimit=10&plnamespace=0&callback=?" , function(data) {
+                                    document.getElementById("dump").textContent = JSON.stringify(data);
+                                    for (var i in data.query.pages) {
+                                        for (var x in data.query.pages[i].links) {
+                                            var page = JSON.stringify(data.query.pages[i].links[x].title);
+                                            page = page.replace(/['"]+/g, '');
+                                            document.getElementById("hack" + hack).textContent = page;
+                                            hack++;
+                                            //console.log(page);
+                                            //happyNodes = nodes;
+                                            //document.getElementById("path").textContent = JSON.stringify(nodes);
+                                        }
+                                    }
+                                });
+                                
+                                added[z] = true;
+                                changed = true;
+                                
+                                //while (document.getElementById("hack" + (numLinks-1)).textContent == ""){}
+                                wait.done(hi);
+                                
+                                function hi(){
+                                    a = 0;
+                                    while(a < numLinks){
+                                        console.log("hack" + a);
+                                        var b = document.getElementById("hack" + a).textContent;
+                                        console.log(b);
+                                        if (nodes[encodeURIComponent(document.getElementById("hack" + a).textContent)] == null){
+                                            nodes[encodeURIComponent(document.getElementById("hack" + a).textContent)] = 100000000;
+                                        }
+                                        a++;
+                                    }
+                                    document.getElementById("path").textContent = JSON.stringify(nodes);
+                                }
+
+                                
+                            }
+                            
+                        }
+                        
+                        
+                    }
+                   
+                    
+                    //document.getElementById("path").textContent = JSON.stringify(nodes);
+                });
+            });
+                    
+                    /*
+                    function build_graphs(title){
+                        $.getJSON("https://simple.wikipedia.org/w/api.php?action=query&titles=" + title + "&prop=links&format=json&pllimit=10&plnamespace=0&callback=?" ,function(data) {
+                            for (var i in data.query.pages) {
+                                for (var x in data.query.pages[i].links) {
+                                    var page = JSON.stringify(data.query.pages[i].links[x].title);
+                                    page = page.replace(/['"]+/g, '');
+                                    if (nodes[page] == null){
+                                        nodes[page] = 100000000;
+                                    }
+                                    if (visited[page] == null){
+                                        visited[page] = false;
+                                    }
+                                    if (added[page] == null){
+                                        added[page] = true;
+                                        /*document.getElementById("path").innerHTML += "<p><a href='http://en.wikipedia.org/wiki/" + encodeURIComponent(page) + "'>" + page + "</p>";
+                                        if (numNodes < nodelimit){
+                                            numNodes += 1;
+                                            build_graphs(page);
+                                        }
+                                        */
+                                            
+                                    //}
+                                    
+                                    //document.getElementById("path").textContent = JSON.stringify(nodes);
+                                     /*
+                                }
+                            }
+                        });
+                    }
+                    console.log("done\n");
+                });
+                */
+            
+        </script>
+    </body>
+</html>
