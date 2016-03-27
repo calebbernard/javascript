@@ -21,6 +21,7 @@
         
         <div id="path"></div>
         <div id="dump"></div>
+        <div id="numNodes"></div>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
         <script>
             
@@ -35,23 +36,30 @@
                     var start = document.getElementById("start").value;
                     var end = document.getElementById("end").value;
                     
-                    name = {};
-                    for (a = 0; a < 150000; a++){
-                        name[a] = "";
+                    maxNodes = 500;
+                    var name = [];
+                    for (a = 0; a < maxNodes * 2; a++){
+                        name.push("");
+                        //console.log(name[a]);
                     }
-                    nodes = {};
-                    for (a = 0; a < 150000; a++){
-                        nodes[a] = 1000000;
+                    var nodes = [];
+                    for (a = 0; a < maxNodes * 2; a++){
+                        nodes.push(1000000);
                     }
-                    parent = {};
-                    for (a = 0; a < 150000; a++){
-                        parent[a] = null;
+                    var parent = [];
+                    for (a = 0; a < maxNodes * 2; a++){
+                        parent.push(null);
                     }
-                    visited = {};
-                    added = {};
-                    nodes[start] = 0;
-                    maxNodes = 10000;
-                    numNodes = 0;
+                    var added = [];
+                    for (a = 0; a < maxNodes * 2; a++){
+                      added.push(false)
+                    }
+                    nodes[0] = 0;
+                    name[0] = start;
+                    console.log(name[0]);
+                    parent[0] = null;
+                    numNodes = 1;
+                    document.getElementById("numNodes").textContent = numNodes;
                     var nodelimit = 10;
                     var recurseLimit = 3;
                     var recursion = 0;
@@ -60,13 +68,14 @@
                     var success = $.Deferred();
                     console.log("hi2\n");
                     var a = 0;
-                    while (changed == true && recursion < recurseLimit){
+                    while (changed == true && document.getElementById("numNodes").textContent < maxNodes){
                         recursion += 1;
                         changed = false;
-                        for (var z in nodes){
-                            if (added[z] == null){
-                                console.log("getting links for " + z + "\n");
-                                $.getJSON("https://simple.wikipedia.org/w/api.php?action=query&pageids=" + z + "&prop=links&format=json&pllimit=10&plnamespace=0&callback=?" , function(data) {
+                        for (var z = 0; z < document.getElementById("numNodes").textContent; z++){
+                            if (added[z] == false){
+                                console.log("getting links for " + name[z] + "\n");
+                                $.getJSON("https://simple.wikipedia.org/w/api.php?action=query&titles=" + encodeURIComponent(name[z]) + "&prop=links&format=json&pllimit=10&plnamespace=0&callback=?" , function(data) {
+                                    numNodes = document.getElementById("numNodes").textContent;
                                     for (var i in data.query.pages) {
                                         for (var x in data.query.pages[i].links) {
                                             var page = JSON.stringify(data.query.pages[i].links[x].title);
@@ -77,6 +86,7 @@
                                                 nodes[numNodes] = nodes[z] + 1;
                                                 parent[numNodes] = z;
                                                 numNodes++;
+                                                document.getElementById("numNodes").textContent = numNodes;
                                             }
                                             
                                             
@@ -85,7 +95,7 @@
                                                 parent[page] = z;
                                             }
                                             if (page == end){
-                                                success = $.getJSON("");
+                                                success = $.getJSON("http://google.com");
                                             }
                                         }
                                     }
